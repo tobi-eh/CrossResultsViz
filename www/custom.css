@@ -1,0 +1,39 @@
+.shiny-output-error-highlightMessage {
+  margin-top: 15px;
+  margin-left: 15px;
+  font-weight: bold;
+  font-size: 22px;
+  color: red;
+}
+.shiny-output-error-highlightInSummary {
+  /*font-weight: bold;*/
+    color: red;
+}
+.centerText {
+  text-align: center;
+  width: 100%;
+  font-size: larger;
+}
+.footer-bad {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 1rem;
+  color: darkblue; 
+  background-color: #efefef;
+    text-align: center;
+}
+.footer {
+  position: fixed; 
+  left: 0; 
+  bottom: 0; 
+  width: 100%; 
+  background-color: lightgrey; 
+  color: darkblue; 
+  text-align: center;
+}
+.note {
+  font-size: smaller;
+  color: lightgrey;
+}
