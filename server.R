@@ -1,6 +1,26 @@
 source("R/functions.R")
 options(stringsAsFactors = F)
 
+DEBUG <- F
+if(DEBUG) { # FOR DEBUG PURPOSES
+  source("R/functions.R")
+  options(stringsAsFactors = F)
+  #
+  raceLink <- "https://www.crossresults.com/race/9590"
+  raceSelected <- "cat134828"
+  #
+  raceLink <- CleanRaceLink(raceLink)
+  racePage <- ReadRacePage(raceLink)
+  raceOptions <- GetRaceOptionsFromPage(racePage)
+  racePreSelected <- raceOptions[raceSelected]
+  print(racePreSelected)
+  # raceOptions
+  raceTable <- GetRaceTableFromPage(racePage, racePreSelected, raceOptions)
+  start.laps.finish.tab <- tab <- GetRaceTimeTable(raceTable)
+  # View(start.laps.finish.tab)
+  # View(raceTable)
+}
+
 ### SERVER
 shinyServer(function(input, output, session) {
   #
