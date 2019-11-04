@@ -134,7 +134,9 @@ shinyServer(function(input, output, session) {
     highlightRacers <- rownames(tab)[input$timetab_rows_selected]
     # 
     # tryCatch({
-        PlotRace(tab, orderByLap=lapSortSelection, highlightRacers=highlightRacers)
+        PlotRace(tab, orderByLap=lapSortSelection,
+                 highlightRacers=highlightRacers, 
+                 raceName=glue("{GetRaceTitle(racePage())} - {input$raceSelection}"))
     #   }, 
     #   error = function(e) validate(need(F, "Something went wrong. Likely, your screen is currently not wide enough. If you are on your smartphone, try rotating your screen! (The plots need width to display properly!)"))
     # )
@@ -148,7 +150,9 @@ shinyServer(function(input, output, session) {
     tab <- start.laps.finish.tab()
     highlightRacers <- rownames(tab)[input$timetab_rows_selected]
     # 
-    PlotRaceProgression(tab, highlightRacers=highlightRacers, showRanksRatherThanTime=as.logical(input$raceProgressionChartType))
+    PlotRaceProgression(tab, highlightRacers=highlightRacers,
+                        showRanksRatherThanTime=as.logical(input$raceProgressionChartType),
+                        raceName=glue("{GetRaceTitle(racePage())} - {input$raceSelection}"))
   }, 
   height=function(){
     nrow(start.laps.finish.tab())*20+100

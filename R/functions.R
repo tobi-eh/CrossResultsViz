@@ -8,7 +8,7 @@ library(RColorBrewer)
 options(stringsAsFactors = F)
 #
 #
-raceLink <- "https://www.crossresults.com/race/9312"
+raceLink <- "https://www.crossresults.com/race/9590"
 ATTR_PLACING <- "PLACING"
 # ATTR_TEAM <- "TEAM"
 #
@@ -67,7 +67,7 @@ ATTR_PLACING <- "PLACING"
   }
   #
   #
-  GetRaceTimeTable <- function(raceTable){
+  GetRaceTimeTable <- function(raceTable, cumulativeTimes=T) {
     #
     riderNames <- str_c(raceTable$`First Name`," ", raceTable$`Last Name`)
     #
@@ -83,7 +83,10 @@ ATTR_PLACING <- "PLACING"
     #
     for (ri in 1:nrow(cumLapTimes)) {
       if (is.na(finalLapIxs[ri])) next;
-      cumLapTimes[ri,finalLapIxs[ri]] <- TimeToSeconds(raceTable$Time[ri])
+      cumTime <- TimeToSeconds(raceTable$Time[ri])
+      if (!is.na(cumTime) && cumTime > 0) {
+        cumLapTimes[ri,finalLapIxs[ri]] <- cumTime#ifelse(is.na(cumTime) && raceTable$Time[ri]!="DNF", cumTime, )
+      }
     }
     #
     raceTable$`Carried Points` <- sapply(raceTable$`Carried Points`, function(ptsStr) as.numeric(str_split(ptsStr," +")[[1]][2]))
@@ -160,14 +163,19 @@ ATTR_PLACING <- "PLACING"
                        orderByLap=NULL, 
                        highlightRacers=c(), highlight.colFun=HighlightColorsForRacers, highlight.lwd=4,
                        marLeft=max(nchar(rownames(start.laps.finish.tab))*0.7),
-                       marBottom=5, marRight=0.5, marTop=3, timeBufferRight=20) 
+                       marBottom=5, marRight=0.5, marTop=3, timeBufferRight=20, 
+                       raceName=""
+                       ) 
   {
     #
     tab <- start.laps.finish.tab  # <- tab.show
+    riderPlacings <- attr(tab[,ncol(tab)], ATTR_PLACING)
     lapTimeColumns <- 2:(ncol(tab)-1)
     #
     tab <- tab[nrow(tab):1,]
-    if(!is.null(orderByLap)) tab <- tab[order(tab[,orderByLap+1],tab[,ncol(tab)], decreasing=T, na.last=F),]
+    if(!is.null(orderByLap)) {
+      tab <- tab[order(tab[,orderByLap+1],tab[,ncol(tab)], decreasing=T, na.last=F),]
+    }
     #
     multiLapRacers.maxLaps <- sapply(1:nrow(tab), function(ri) max(which(!is.na(tab[ri,lapTimeColumns])),na.rm = T))
     multiLapRacers.maxLaps[which(is.infinite(multiLapRacers.maxLaps))] <- NA
@@ -197,19 +205,24 @@ ATTR_PLACING <- "PLACING"
     lapLeaders <- colMins(as.matrix(tab[lapTimeColumns]), na.rm=T)
     segments(x0=lapLeaders, x1=lapLeaders, y0=0.5, y1=nrow(tab), col='pink', lty=3, lwd=0.5)
     #
+    # TODO add actual rider ranks for last lap (incl dnf status)
+    names.show <- str_c(rownames(tab), " - ",nrow(tab):1)
+    if (!is.null(orderByLap) && orderByLap == ncol(tab)-2) { # last lap
+      names.show <- str_c(rownames(tab), " - ", riderPlacings[rownames(tab)])
+    }
     if (length(highlightRacers) < nrow(tab)) {
       is <- which(!rownames(tab)%in%highlightRacers)
-      axis(2, at=(1:nrow(tab))[is], labels=str_c(rownames(tab), " - ",nrow(tab):1)[is], las=1, font=1)
+      axis(2, at=(1:nrow(tab))[is], labels=names.show[is], las=1, font=1)
     }
     if (length(highlightRacers) > 0) {
       is <- which(rownames(tab)%in%highlightRacers)
-      axis(2, at=(1:nrow(tab))[is], labels=str_c(rownames(tab), " - ",nrow(tab):1)[is], las=1, font=2)
+      axis(2, at=(1:nrow(tab))[is], labels=names.show[is], las=1, font=2)
     }
     timetags.minutes.max <- max(tab[,lapTimeColumns],na.rm=T)/60
     timetags.minutes <- seq(0, floor(timetags.minutes.max), by=5)
     axis(1, at=60*timetags.minutes, labels = as.character(timetags.minutes))
     #
-    title(main=glue("Ranking after {orderByLap} Lap{ifelse(orderByLap==1,'','s')}"))
+    title(main=glue("{raceName}\nRanking after {orderByLap} Lap{ifelse(orderByLap==1,'','s')}"))
     title(xlab = "Laps over Time (Minutes)", line = 2)
   }
   #
@@ -219,7 +232,9 @@ ATTR_PLACING <- "PLACING"
                                   highlightRacers=c(), highlight.colFun=HighlightColorsForRacers,  highlight.lwd=4,
                                   showRanksRatherThanTime = F, 
                                   marLeft=max(nchar(rownames(start.laps.finish.tab))*0.7),
-                                  marBottom=5.5, marRight=marLeft, marTop=3) 
+                                  marBottom=5.5, marRight=marLeft, marTop=3, 
+                                  raceName=""
+                                  ) 
   { 
     #
     tab <- start.laps.finish.tab  # <- tab.show
@@ -315,7 +330,7 @@ ATTR_PLACING <- "PLACING"
     }
     axis(1, at=c(0:1,lapTimeColumns), labels=c("Start",str_c("Lap ", lapTimeColumns-1), "Finish"))
     #
-    title(main=glue("Race Progression"), 
+    title(main=glue("{raceName}\nRace Progression"), 
           sub=ifelse(showRanksRatherThanTime,
                      "(showing riders' ranks on each lap)",
                      "(showing riders' ranks on each lap, spaced proportional to time gaps)"))
