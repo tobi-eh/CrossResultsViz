@@ -246,7 +246,7 @@ ATTR_PLACING <- "PLACING"
     tab <- tab[order(tab[,1],decreasing = T),]
     #
     tab2 <- tab
-    F.offset <- 0
+    F.offset <- 0 #.25
     if (showRanksRatherThanTime) {
       tab[,lapTimeColumns] <- apply(tab[,lapTimeColumns],2, function(lapCumTimes) {
         lapCumTimes <- abs(rank(lapCumTimes, na.last = 'keep', ties.method='first') - 1 - length(lapCumTimes))
@@ -296,7 +296,7 @@ ATTR_PLACING <- "PLACING"
                y0=tab[,max(lapTimeColumns)],
                y1=abs(tab[,ncol(tab)] - 1 - nrow(tab)),
                col=sapply(rownames(tab), function(rn) ifelse(rn %in% highlightRacers, highlightColors[rn], 'lightgrey')),
-               lwd=1,sapply(rownames(tab), function(r) ifelse(r %in% highlightRacers, highlight.lwd, 1)),
+               lwd=sapply(rownames(tab), function(r) ifelse(r %in% highlightRacers, highlight.lwd-1, 1)),
                lty=2,
                xlim=xlim, ylim=ylim); par(new=T)
     }
