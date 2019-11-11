@@ -296,7 +296,8 @@ ATTR_PLACING <- "PLACING"
                y0=tab[,max(lapTimeColumns)],
                y1=abs(tab[,ncol(tab)] - 1 - nrow(tab)),
                col=sapply(rownames(tab), function(rn) ifelse(rn %in% highlightRacers, highlightColors[rn], 'lightgrey')),
-               lwd=sapply(rownames(tab), function(r) ifelse(r %in% highlightRacers, highlight.lwd, 1)),
+               lwd=1,sapply(rownames(tab), function(r) ifelse(r %in% highlightRacers, highlight.lwd, 1)),
+               lty=2,
                xlim=xlim, ylim=ylim); par(new=T)
     }
     #
